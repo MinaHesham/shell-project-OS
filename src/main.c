@@ -199,6 +199,19 @@ int lsh_execute(char **args)
 
   for (i = 0; i < lsh_num_builtins(); i++) {
     if (strcmp(args[0], builtin_str[i]) == 0) {
+      if (history_count < HISTORY_MAX_SIZE) {    
+          char full_command[1024] = "";
+          int j = 0;
+          while (args[j] != NULL) {
+              strcat(full_command, args[j]);
+              if (args[j+1] != NULL) {
+                  strcat(full_command, " ");
+              }
+              j++;
+          }
+          history_storage[history_count] = strdup(full_command);
+          history_count++;
+      }
       return (*builtin_func[i])(args);
     }
   }
@@ -315,11 +328,6 @@ void lsh_loop(void)
   do {
     printf("> ");
     line = lsh_read_line();
-
-    if (line != NULL && strlen(line) > 0 && history_count < HISTORY_MAX_SIZE) {
-          history_storage[history_count] = strdup(line);
-          history_count++;
-    }
     args = lsh_split_line(line);
     status = lsh_execute(args);
 
